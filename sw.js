@@ -1,17 +1,7 @@
-var CACHE_NAME = "arabic-game-v2";
-var urlsToCache = [
-  "./",
-  "./index.html",
-  "./manifest.json"
-];
+var CACHE_NAME = "arabic-game-v3";
 
 self.addEventListener("install", function(event) {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then(function(cache) {
-      return cache.addAll(urlsToCache);
-    })
-  );
-  self.skipWaiting();
+  self.skipWaiting(); // این خط باعث میشه فوراً آپدیت بشه
 });
 
 self.addEventListener("activate", function(event) {
@@ -22,22 +12,17 @@ self.addEventListener("activate", function(event) {
           if (key !== CACHE_NAME) return caches.delete(key);
         })
       );
+    }).then(function() {
+      return self.clients.claim();
     })
   );
-  self.clients.claim();
 });
 
 self.addEventListener("fetch", function(event) {
+  // این بخش همیشه اول میره از اینترنت میگیره، اگه نبود از کش میخونه
   event.respondWith(
-    caches.match(event.request).then(function(response) {
-      return response || fetch(event.request).then(function(res) {
-        return caches.open(CACHE_NAME).then(function(cache) {
-          cache.put(event.request, res.clone());
-          return res;
-        });
-      });
-    }).catch(function() {
-      return caches.match("./index.html");
+    fetch(event.request).catch(function() {
+      return caches.match(event.request);
     })
   );
 });

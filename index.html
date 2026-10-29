@@ -24,87 +24,81 @@
     text-align: center;
     box-shadow: 0 8px 32px rgba(0,0,0,0.3);
   }
-  h1 { font-size: 1.3rem; margin-bottom: 15px; color: #ffd700; }
-  .menu-grid {
-    display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
-    margin-top: 15px;
-  }
+  h1 { font-size: 1.2rem; margin-bottom: 10px; color: #ffd700; }
+  .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
   .lesson-btn {
     padding: 15px 10px; font-size: 1rem; font-family: inherit;
-    border: 1px solid rgba(255,255,255,0.25);
-    border-radius: 12px;
-    background: rgba(255,255,255,0.15);
-    color: #fff; cursor: pointer; transition: 0.2s;
+    border: 1px solid rgba(255,255,255,0.25); border-radius: 12px;
+    background: rgba(255,255,255,0.15); color: #fff; cursor: pointer; transition: 0.2s;
   }
   .lesson-btn:hover:not(:disabled) { background: rgba(255,255,255,0.3); }
-  .lesson-btn:active { transform: scale(0.95); }
-  .score { margin-bottom: 15px; color: #ffd700; font-size: 0.95rem; }
+  
+  /* استایل تایمر */
+  .timer-container {
+    width: 100%; height: 10px; background: rgba(255,255,255,0.2);
+    border-radius: 10px; margin-bottom: 15px; overflow: hidden;
+  }
+  .timer-bar {
+    height: 100%; width: 100%; background: #28a745; border-radius: 10px;
+    transition: width 1s linear, background-color 0.5s;
+  }
+  .timer-text { font-size: 0.9rem; color: #ffd700; margin-bottom: 10px; font-weight: bold; }
+
+  .score { margin-bottom: 10px; color: #ffd700; font-size: 0.95rem; }
   .word {
     font-size: 2.2rem; font-weight: bold; margin: 18px 0;
-    text-shadow: 0 0 20px rgba(255,215,0,0.6);
-    word-break: break-word;
+    text-shadow: 0 0 20px rgba(255,215,0,0.6); word-break: break-word;
   }
-  .options {
-    display: grid; grid-template-columns: 1fr 1fr;
-    gap: 10px; margin-top: 15px;
-  }
+  .options { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
   .option {
     padding: 14px 8px; font-size: 0.95rem; font-family: inherit;
-    border: 1px solid rgba(255,255,255,0.25);
-    border-radius: 12px;
-    background: rgba(255,255,255,0.15);
-    color: #fff; cursor: pointer; transition: 0.15s;
-    min-height: 58px;
+    border: 1px solid rgba(255,255,255,0.25); border-radius: 12px;
+    background: rgba(255,255,255,0.15); color: #fff; cursor: pointer; transition: 0.15s; min-height: 58px;
   }
   .option.correct { background: #28a745; border-color: #28a745; }
   .option.wrong { background: #dc3545; border-color: #dc3545; }
   .option:disabled { cursor: not-allowed; opacity: 0.9; }
   .message { margin-top: 18px; font-size: 1rem; min-height: 26px; font-weight: bold; }
   .confetti {
-    position: fixed; width: 10px; height: 10px; top: -12px;
-    z-index: 999; animation: fall linear forwards; border-radius: 2px;
-    pointer-events: none;
+    position: fixed; width: 10px; height: 10px; top: -12px; z-index: 999;
+    animation: fall linear forwards; border-radius: 2px; pointer-events: none;
   }
-  @keyframes fall {
-    to { transform: translateY(105vh) rotate(720deg); opacity: 0; }
-  }
+  @keyframes fall { to { transform: translateY(105vh) rotate(720deg); opacity: 0; } }
   .action-btn {
-    margin-top: 18px; padding: 12px 20px;
-    background: #ffd700; color: #1e3c72;
-    border: none; border-radius: 12px;
-    font-family: inherit; font-size: 1rem; font-weight: bold;
+    margin-top: 18px; padding: 12px 20px; background: #ffd700; color: #1e3c72;
+    border: none; border-radius: 12px; font-family: inherit; font-size: 1rem; font-weight: bold;
     cursor: pointer; display: none; width: 100%;
   }
-  .action-btn:active { transform: scale(0.97); }
-  .back-btn {
-    background: #4ecdc4; color: #1e3c72; margin-bottom: 10px; display: inline-block; width: auto; padding: 8px 15px; font-size: 0.9rem;
-  }
+  .back-btn { background: #4ecdc4; color: #1e3c72; margin-bottom: 10px; display: inline-block; width: auto; padding: 8px 15px; font-size: 0.9rem; }
 </style>
 </head>
 <body>
 
 <div class="game-box" id="gameBox">
-  <!-- منوی انتخاب درس -->
   <div id="menuScreen">
     <h1>:books: انتخاب درس</h1>
     <div class="menu-grid" id="lessonList"></div>
   </div>
 
-  <!-- صفحه بازی -->
   <div id="playScreen" style="display: none;">
     <h1 id="lessonTitle">درس ۱</h1>
+    
+    <div class="timer-container"><div class="timer-bar" id="timerBar"></div></div>
+    <div class="timer-text" id="timerText">زمان: ۷ ثانیه</div>
+
     <div class="score">امتیاز: <span id="score">0</span> / <span id="total">0</span></div>
-    <div class="word" id="word">...</div>
+<div class="word" id="word">...</div>
     <div class="options" id="options"></div>
     <div class="message" id="message"></div>
+    
     <button class="action-btn back-btn" id="backBtn">:back: بازگشت به منو</button>
     <button class="action-btn" id="restartBtn">:arrows_counterclockwise: شروع دوباره این درس</button>
   </div>
 </div>
 
 <script>
-  // دیتابیس لغات به تفکیک درس
-var allLessons = {
+  // دیتابیس لغات
+  var allLessons = {
     1: [
       { word: "دِراسَة", correct: "درس خواندن، تحصیل", wrongs: ["درس دادن", "دانش‌آموز", "مدرسه"] },
       { word: "دَرَّسَ", correct: "درس داد", wrongs: ["درس خواند", "یاد گرفت", "نوشت"] },
@@ -149,10 +143,10 @@ var allLessons = {
     ],
     2: [
       { word: "قُبْح", correct: "زشتی", wrongs: ["زیبایی", "بزرگی", "کوچکی"] },
-      { word: "أَحَبُّ", correct: "محبوب‌ترین", wrongs: ["منفورترین", "بزرگ‌ترین", "کوچک‌ترین"] },
+{ word: "أَحَبُّ", correct: "محبوب‌ترین", wrongs: ["منفورترین", "بزرگ‌ترین", "کوچک‌ترین"] },
       { word: "أَنْصَح", correct: "نصیحت‌کننده‌ترین", wrongs: ["باهوش‌ترین", "قوی‌ترین", "ضعیف‌ترین"] },
       { word: "جِهَة", correct: "مسیر، جهت", wrongs: ["خیابان", "مغازه", "خانه"] },
-{ word: "هادِئ", correct: "آرام", wrongs: ["شلوغ", "پر سر و صدا", "عصبانی"] },
+      { word: "هادِئ", correct: "آرام", wrongs: ["شلوغ", "پر سر و صدا", "عصبانی"] },
       { word: "فَجْأَةً", correct: "ناگهان", wrongs: ["آرام آرام", "به زودی", "همیشه"] },
       { word: "شَقاوَة", correct: "بدبختی", wrongs: ["خوشبختی", "شادی", "آرامش"] },
       { word: "رَصید", correct: "شارژ و اعتبار مالی", wrongs: ["پول نقد", "کارت بانکی", "وام"] },
@@ -192,12 +186,12 @@ var allLessons = {
       { word: "تَفَضَّلْ", correct: "بفرما", wrongs: ["برو", "بنشین", "بلند شو"] },
       { word: "بِلا ازْدِحام", correct: "بدون شلوغی", wrongs: ["با شلوغی", "با سرعت", "با آرامش"] },
       { word: "سَیْر", correct: "حرکت", wrongs: ["توقف", "ایستادن", "نشستن"] },
-      { word: "اِقْتَرَبَ", correct: "نزدیک شد", wrongs: ["دور شد", "رفت", "ایستاد"] }
+{ word: "اِقْتَرَبَ", correct: "نزدیک شد", wrongs: ["دور شد", "رفت", "ایستاد"] }
     ],
     3: [
       { word: "غَضْبان", correct: "خشمگین", wrongs: ["خوشحال", "آرام", "ناراحت"] },
       { word: "غَضَبَ", correct: "خشمگین شد", wrongs: ["آرام شد", "خندید", "گریه کرد"] },
-{ word: "قَسَّمَ", correct: "تقسیم کرد", wrongs: ["جمع کرد", "ضرب کرد", "کم کرد"] },
+      { word: "قَسَّمَ", correct: "تقسیم کرد", wrongs: ["جمع کرد", "ضرب کرد", "کم کرد"] },
       { word: "قَبَّلَ", correct: "بوسید", wrongs: ["دست داد", "در آغوش گرفت", "سلام کرد"] },
       { word: "کَشَفَ", correct: "آشکار کرد", wrongs: ["پنهان کرد", "پوشاند", "بست"] },
       { word: "حَسِبَ", correct: "پنداشت", wrongs: ["دانست", "دید", "شنید"] },
@@ -239,11 +233,11 @@ var allLessons = {
       { word: "اِنْکَسَرَ", correct: "شکسته شد", wrongs: ["سالم شد", "درست شد", "تعمیر شد"] },
       { word: "نَزَلَ", correct: "پایین آمد", wrongs: ["بالا رفت", "ایستاد", "نشست"] },
       { word: "مَضیٰ", correct: "گذشت", wrongs: ["ماند", "ایستاد", "برگشت"] },
-      { word: "فَقَدَ", correct: "از دست داد", wrongs: ["پیدا کرد", "به دست آورد", "خرید"] },
+{ word: "فَقَدَ", correct: "از دست داد", wrongs: ["پیدا کرد", "به دست آورد", "خرید"] },
       { word: "عَصَفَ", correct: "وزید", wrongs: ["بارید", "ایستاد", "خشک شد"] },
       { word: "صَلّیٰ", correct: "نماز خواند", wrongs: ["روزه گرفت", "دعا کرد", "خوابید"] },
       { word: "صَرَخَ", correct: "فریاد زد", wrongs: ["ساکت شد", "پچ‌پچ کرد", "خندید"] },
-{ word: "أَداء", correct: "انجام دادن", wrongs: ["رها کردن", "فراموش کردن", "نادیده گرفتن"] },
+      { word: "أَداء", correct: "انجام دادن", wrongs: ["رها کردن", "فراموش کردن", "نادیده گرفتن"] },
       { word: "تَعْدِلُ", correct: "برابر است", wrongs: ["کمتر است", "بیشتر است", "تقسیم می‌شود"] },
       { word: "مُواصَلَة", correct: "ادامه دادن", wrongs: ["قطع کردن", "شروع کردن", "تمام کردن"] },
       { word: "مُحاوَلَة", correct: "تلاش کردن", wrongs: ["رها کردن", "خسته شدن", "موفق شدن"] },
@@ -286,11 +280,11 @@ var allLessons = {
       { word: "لَجَّ", correct: "پافشاری کرد", wrongs: ["رها کرد", "عقب نشست", "ترسید"] },
       { word: "جَرَّحَ", correct: "زخمی کرد", wrongs: ["درمان کرد", "شفا داد", "کمک کرد"] },
       { word: "ظَنَّ", correct: "گمان کرد", wrongs: ["یقین کرد", "دانست", "دید"] },
-      { word: "سَکَتَ", correct: "ساکت شد", wrongs: ["فریاد زد", "حرف زد", "خندید"] },
+{ word: "سَکَتَ", correct: "ساکت شد", wrongs: ["فریاد زد", "حرف زد", "خندید"] },
       { word: "قَرَعَ", correct: "کوبید", wrongs: ["باز کرد", "بست", "شکست"] },
       { word: "شَجَّعَ عَلَیٰ", correct: "تشویق کرد به", wrongs: ["منصرف کرد از", "ترساند از", "بازداشت از"] },
       { word: "نَقَصَ", correct: "کم شد", wrongs: ["زیاد شد", "بزرگ شد", "کامل شد"] },
-{ word: "حَلَفَ", correct: "سوگند خورد", wrongs: ["دروغ گفت", "قسم خورد", "توبه کرد"] },
+      { word: "حَلَفَ", correct: "سوگند خورد", wrongs: ["دروغ گفت", "قسم خورد", "توبه کرد"] },
       { word: "وَلَجَ", correct: "داخل شد", wrongs: ["خارج شد", "فرار کرد", "ایستاد"] },
       { word: "حَفَروا", correct: "حفر کردند", wrongs: ["پر کردند", "کندند", "ساختند"] },
       { word: "هَرَبَ", correct: "فرار کرد", wrongs: ["مبارزه کرد", "ایستاد", "کمک کرد"] },
@@ -332,13 +326,13 @@ var allLessons = {
       { word: "جَلَبَ", correct: "آورد", wrongs: ["برد", "فرستاد", "گرفت"] },
       { word: "مُبین", correct: "آشکار", wrongs: ["پنهان", "مخفی", "تاریک"] },
       { word: "رَأْس", correct: "سر", wrongs: ["پا", "دست", "چشم"] },
-      { word: "جَسَد", correct: "بدن", wrongs: ["روح", "جان", "قلب"] },
+{ word: "جَسَد", correct: "بدن", wrongs: ["روح", "جان", "قلب"] },
       { word: "کَثْرَة", correct: "فراوانی", wrongs: ["کمی", "نایابی", "کمبود"] }
     ],
     7: [
       { word: "کَهْرَباء", correct: "برق", wrongs: ["آب", "گاز", "هوا"] },
       { word: "طاقَة کَهْرَبائیَّة", correct: "نیروی برق", wrongs: ["نیروی آب", "نیروی باد", "نیروی هسته‌ای"] },
-{ word: "کیمیاويّ", correct: "شیمیایی", wrongs: ["فیزیکی", "زیستی", "ریاضی"] },
+      { word: "کیمیاويّ", correct: "شیمیایی", wrongs: ["فیزیکی", "زیستی", "ریاضی"] },
       { word: "صِناعَة", correct: "صنعت", wrongs: ["کشاورزی", "تجارت", "خدمات"] },
       { word: "صِناعیَّة", correct: "صنعتی", wrongs: ["کشاورزی", "تجاری", "خدماتی"] },
       { word: "بَطّاریَّة", correct: "باتری", wrongs: ["لوله", "سیم", "کلید"] },
@@ -378,13 +372,13 @@ var allLessons = {
       { word: "مَجْنون", correct: "دیوانه", wrongs: ["عاقل", "باهوش", "دانا"] },
       { word: "قَصیر", correct: "کوتاه", wrongs: ["بلند", "بزرگ", "کوچک"] },
       { word: "قِراءَة", correct: "خواندن", wrongs: ["نوشتن", "شنیدن", "گفتن"] },
-      { word: "حَریق", correct: "آتش", wrongs: ["آب", "خاک", "هوا"] },
+{ word: "حَریق", correct: "آتش", wrongs: ["آب", "خاک", "هوا"] },
       { word: "صورَة", correct: "عکس", wrongs: ["نقاشی", "فیلم", "مجسمه"] }
     ],
     8: [
       { word: "سَیّارَةُ الْأُجْرَة", correct: "تاکسی", wrongs: ["اتوبوس", "مترو", "قطار"] },
       { word: "سائِق", correct: "راننده", wrongs: ["مسافر", "پلیس", "عابر"] },
-{ word: "نُقود", correct: "پول", wrongs: ["طلا", "سکه", "اسکناس"] },
+      { word: "نُقود", correct: "پول", wrongs: ["طلا", "سکه", "اسکناس"] },
       { word: "اِرْکَبوا", correct: "سوار شوید", wrongs: ["پیاده شوید", "بایستید", "بنشینید"] },
       { word: "دَلیل", correct: "راهنما", wrongs: ["راننده", "مسافر", "پلیس"] },
       { word: "مُتْحَف", correct: "موزه", wrongs: ["کتابخانه", "گالری", "نمایشگاه"] },
@@ -426,11 +420,11 @@ var allLessons = {
       { word: "مُجَفَّف", correct: "خشک شده", wrongs: ["خیس", "تازه", "آبدار"] },
       { word: "تَلْوین", correct: "رنگ‌آمیزی", wrongs: ["نقاشی", "طراحی", "کشیدن"] },
       { word: "لَوْن", correct: "رنگ", wrongs: ["شکل", "اندازه", "جنس"] },
-      { word: "بَنَفْسَجيّ", correct: "بنفش", wrongs: ["آبی", "قرمز", "سبز"] },
+{ word: "بَنَفْسَجيّ", correct: "بنفش", wrongs: ["آبی", "قرمز", "سبز"] },
       { word: "تَعْویض", correct: "جبران کردن", wrongs: ["بخشیدن", "فراموش کردن", "نادیده گرفتن"] },
       { word: "خَطَأ", correct: "خطا، اشتباه", wrongs: ["درستی", "صحیح", "دقت"] },
       { word: "سَخاء", correct: "بخشندگی", wrongs: ["بخل", "خساست", "تنبلی"] },
-{ word: "وَرَع", correct: "پارسایی", wrongs: ["گناهکاری", "بی‌تقی", "فساد"] },
+      { word: "وَرَع", correct: "پارسایی", wrongs: ["گناهکاری", "بی‌تقی", "فساد"] },
       { word: "مُهَدَّئ", correct: "آرام‌بخش", wrongs: ["آزاردهنده", "مشکل‌ساز", "ترساننده"] },
       { word: "حَرَّکَ", correct: "تحریک کرد", wrongs: ["ساکت کرد", "متوقف کرد", "آرام کرد"] },
       { word: "قَلَّ", correct: "کم شد", wrongs: ["زیاد شد", "بزرگ شد", "کامل شد"] },
@@ -472,10 +466,10 @@ var allLessons = {
       { word: "نَسیرُ", correct: "حرکت می‌کنیم", wrongs: ["می‌ایستیم", "توقف می‌کنیم", "می‌نشینیم"] },
       { word: "نَهَضَ", correct: "برخاست", wrongs: ["نشست", "خوابید", "افتاد"] },
       { word: "أَرْجو", correct: "خواهش می‌کنم", wrongs: ["دستور می‌دهم", "نهی می‌کنم", "منع می‌کنم"] },
-      { word: "اِسْتَخْدَمَ", correct: "به کار گرفت", wrongs: ["رها کرد", "کنار گذاشت", "استفاده نکرد"] },
+{ word: "اِسْتَخْدَمَ", correct: "به کار گرفت", wrongs: ["رها کرد", "کنار گذاشت", "استفاده نکرد"] },
       { word: "اِسْتَخَرْنا", correct: "استخاره کردیم", wrongs: ["مشورت کردیم", "تصمیم گرفتیم", "انتخاب کردیم"] },
       { word: "اِسْتَرْجَعَ", correct: "پس گرفت", wrongs: ["پس داد", "بخشید", "رها کرد"] },
-{ word: "أَهْدَیْتُ", correct: "هدایت کردم", wrongs: ["گمراه کردم", "رها کردم", "تنها گذاشتم"] },
+      { word: "أَهْدَیْتُ", correct: "هدایت کردم", wrongs: ["گمراه کردم", "رها کردم", "تنها گذاشتم"] },
       { word: "سَلَّمَ", correct: "سلام کرد", wrongs: ["خداحافظی کرد", "دست داد", "بوسید"] },
       { word: "یُمْکِنُ الْقَوْلُ", correct: "می‌شود گفت", wrongs: ["نمی‌شود گفت", "باید گفت", "نباید گفت"] },
       { word: "تَعرِفونَني", correct: "مرا می‌شناسید", wrongs: ["مرا نمی‌شناسید", "شما را می‌شناسم", "شما را نمی‌شناسم"] },
@@ -496,6 +490,11 @@ var allLessons = {
   var order = [];
   var currentLessonNum = 1;
 
+  // متغیرهای تایمر
+  var timerInterval;
+  var timeLeft = 7;
+  var maxTime = 7;
+
   var menuScreen = document.getElementById("menuScreen");
   var playScreen = document.getElementById("playScreen");
   var lessonList = document.getElementById("lessonList");
@@ -507,6 +506,10 @@ var allLessons = {
   var totalEl = document.getElementById("total");
   var restartBtn = document.getElementById("restartBtn");
   var backBtn = document.getElementById("backBtn");
+  
+  // المنت‌های تایمر
+  var timerBar = document.getElementById("timerBar");
+  var timerText = document.getElementById("timerText");
 
   function shuffle(arr) {
     var a = arr.slice();
@@ -517,7 +520,6 @@ var allLessons = {
     return a;
   }
 
-  // ساخت منوی دروس
   function buildMenu() {
     lessonList.innerHTML = "";
     for (var i = 1; i <= 10; i++) {
@@ -552,27 +554,30 @@ var allLessons = {
   }
 
   function loadQuestion() {
+    clearInterval(timerInterval); // تایمر قبلی رو متوقف کن
+    
     if (currentIndex >= order.length) {
       wordEl.textContent = ":tada:";
       optionsEl.innerHTML = "";
       messageEl.textContent = "بازی تمام شد! امتیاز: " + score + " از " + order.length;
       messageEl.style.color = "#ffd700";
       restartBtn.style.display = "block";
+      timerBar.style.width = "0%";
+      timerText.style.display = "none";
       return;
     }
-    var q = order[currentIndex];
+var q = order[currentIndex];
     wordEl.textContent = q.word;
     messageEl.textContent = "";
     messageEl.style.color = "#fff";
     
-    // ساخت گزینه‌ها: ۱ درست + ۳ غلط
     var allOptions = [q.correct].concat(q.wrongs.slice(0, 3));
     var shuffledOptions = shuffle(allOptions);
     
     optionsEl.innerHTML = "";
     for (var i = 0; i < shuffledOptions.length; i++) {
       var btn = document.createElement("button");
-btn.className = "option";
+      btn.className = "option";
       btn.textContent = shuffledOptions[i];
       btn.setAttribute("data-value", shuffledOptions[i]);
       btn.onclick = (function (b, val) {
@@ -580,9 +585,61 @@ btn.className = "option";
       })(btn, shuffledOptions[i]);
       optionsEl.appendChild(btn);
     }
+
+    // شروع تایمر برای سوال جدید
+    startTimer(q.correct);
+  }
+
+  function startTimer(correctAnswer) {
+    timeLeft = maxTime;
+    timerBar.style.width = "100%";
+    timerBar.style.backgroundColor = "#28a745";
+    timerText.style.display = "block";
+    timerText.textContent = "زمان: " + timeLeft + " ثانیه";
+
+    timerInterval = setInterval(function() {
+      timeLeft--;
+      timerText.textContent = "زمان: " + timeLeft + " ثانیه";
+      
+      // محاسبه درصد برای نوار تایمر
+      var percentage = (timeLeft / maxTime) * 100;
+      timerBar.style.width = percentage + "%";
+
+      // تغییر رنگ در ثانیه‌های آخر
+      if (timeLeft <= 3) {
+        timerBar.style.backgroundColor = "#dc3545"; // قرمز
+      } else if (timeLeft <= 5) {
+        timerBar.style.backgroundColor = "#ffc107"; // زرد
+      }
+
+      if (timeLeft <= 0) {
+        clearInterval(timerInterval);
+        timeOut(correctAnswer);
+      }
+    }, 1000);
+  }
+
+  function timeOut(correctAnswer) {
+    // غیرفعال کردن دکمه‌ها
+    var all = optionsEl.querySelectorAll(".option");
+    for (var i = 0; i < all.length; i++) {
+      all[i].disabled = true;
+      if (all[i].getAttribute("data-value") === correctAnswer) {
+        all[i].classList.add("correct"); // نمایش جواب درست
+      }
+    }
+    
+    messageEl.textContent = ":alarm_clock: زمان تمام شد! جواب: " + correctAnswer;
+    messageEl.style.color = "#dc3545";
+    if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
+
+    currentIndex++;
+    setTimeout(loadQuestion, 2000); // ۲ ثانیه مکث قبل از سوال بعدی
   }
 
   function checkAnswer(btn, selected, correct) {
+    clearInterval(timerInterval); // وقتی جواب داد، تایمر رو نگه دار
+    
     var all = optionsEl.querySelectorAll(".option");
     for (var i = 0; i < all.length; i++) all[i].disabled = true;
 
@@ -625,9 +682,9 @@ btn.className = "option";
       })(conf);
     }
   }
-
-  restartBtn.onclick = startGame;
+restartBtn.onclick = startGame;
   backBtn.onclick = function() {
+    clearInterval(timerInterval); // تایمر رو متوقف کن
     playScreen.style.display = "none";
     menuScreen.style.display = "block";
   };

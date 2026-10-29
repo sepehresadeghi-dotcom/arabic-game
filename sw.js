@@ -1,4 +1,4 @@
-var CACHE_NAME = "arabic-game-v3";
+var CACHE_NAME = "arabic-game-v4";
 
 self.addEventListener("install", function(event) {
   self.skipWaiting(); // این خط باعث میشه فوراً آپدیت بشه

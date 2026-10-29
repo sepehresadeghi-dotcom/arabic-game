@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#1e3c72">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="بازی عربی">
+<link rel="manifest" href="manifest.json">
+<title>بازی ترجمه عربی</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body {
+    font-family: Tahoma, sans-serif;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #1e3c72, #2a5298);
+    color: #fff; padding: 15px;
+    display: flex; align-items: center; justify-content: center;
+    user-select: none; -webkit-user-select: none;
+  }
+  .game-box {
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 20px; padding: 25px 20px;
+    width: 100%; max-width: 500px;
+    text-align: center;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+  }
+  h1 { font-size: 1.2rem; margin-bottom: 10px; color: #ffd700; }
+  .score { margin-bottom: 15px; color: #ffd700; font-size: 0.95rem; }
+  .word {
+    font-size: 2.2rem; font-weight: bold; margin: 18px 0;
+    text-shadow: 0 0 20px rgba(255,215,0,0.6);
+    word-break: break-word;
+  }
+  .options {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 10px; margin-top: 15px;
+  }
+  .option {
+    padding: 14px 8px; font-size: 0.95rem; font-family: inherit;
+    border: 1px solid rgba(255,255,255,0.25);
+    border-radius: 12px;
+    background: rgba(255,255,255,0.15);
+    color: #fff; cursor: pointer; transition: 0.15s;
+    min-height: 58px;
+  }
+  .option:active:not(:disabled) { transform: scale(0.97); }
+  .option.correct { background: #28a745; border-color: #28a745; }
+  .option.wrong { background: #dc3545; border-color: #dc3545; }
+  .option:disabled { cursor: not-allowed; opacity: 0.9; }
+  .message { margin-top: 18px; font-size: 1rem; min-height: 26px; font-weight: bold; }
+  .confetti {
+    position: fixed; width: 10px; height: 10px; top: -12px;
+    z-index: 999; animation: fall linear forwards; border-radius: 2px;
+    pointer-events: none;
+  }
+  @keyframes fall {
+    to { transform: translateY(105vh) rotate(720deg); opacity: 0; }
+  }
+  .restart {
+    margin-top: 18px; padding: 12px 28px;
+    background: #ffd700; color: #1e3c72;
+    border: none; border-radius: 12px;
+    font-family: inherit; font-size: 1rem; font-weight: bold;
+    cursor: pointer; display: none;
+    width: 100%;
+  }
+  .restart:active { transform: scale(0.97); }
+
+  /* بنر نصب */
+  .install-banner {
+    position: fixed; bottom: 15px; left: 15px; right: 15px;
+    background: #ffd700; color: #1e3c72;
+    padding: 12px 18px; border-radius: 14px;
+    display: none; align-items: center; justify-content: space-between;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.4); z-index: 1000;
+    font-size: 0.9rem; font-weight: bold;
+  }
+  .install-banner button {
+    background: #1e3c72; color: #fff;
+    border: none; padding: 8px 16px;
+    border-radius: 8px; font-family: inherit;
+    font-weight: bold; cursor: pointer; font-size: 0.85rem;
+  }
+  @media (max-width: 360px) {
+    .word { font-size: 1.8rem; }
+    .option { font-size: 0.85rem; min-height: 52px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="game-box">
+  <h1>:dart: بازی ترجمه عربی</h1>
+  <div class="score">امتیاز: <span id="score">0</span> / <span id="total">0</span></div>
+  <div class="word" id="word">...</div>
+  <div class="options" id="options"></div>
+  <div class="message" id="message"></div>
+  <button class="restart" id="restart">:arrows_counterclockwise: بازی مجدد</button>
+</div>
+
+<div class="install-banner" id="installBanner">
+  <span>:calling: نصب روی گوشی</span>
+  <button id="installBtn">نصب</button>
+</div>
+<script>
+  var questions = [
+    { word: "الغُبُور", correct: "عبور کردن", options: ["عبور کردن", "نشستن", "خوابیدن", "برگشتن"] },
+    { word: "طَعام", correct: "غذا", options: ["غذا", "خانه", "اتاق", "خیابان"] },
+    { word: "الآمِن", correct: "ایمن، امن", options: ["ایمن، امن", "بیمار", "آرام", "باهوش"] },
+    { word: "قُبْح", correct: "زشتی", options: ["زشتی", "خانواده", "پدر", "مدرسه"] },
+    { word: "جَلَسَ", correct: "نشست", options: ["نشست", "خوابید", "برگشت", "بست"] },
+    { word: "غُرْفَة", correct: "اتاق", options: ["اتاق", "غذا", "خانه", "خیابان"] },
+    { word: "آمَنَ", correct: "ایمان آورد", options: ["ایمان آورد", "صحبت کرد", "صدا زد", "نگاه کرد"] },
+    { word: "تُعطینی", correct: "به من می‌دهی", options: ["به من می‌دهی", "می‌پوشاند", "می‌بندند", "برخورد می‌کند"] },
+    { word: "أب", correct: "پدر", options: ["پدر", "مادر", "خانه", "روز"] },
+    { word: "باب", correct: "در", options: ["در", "خانه", "اتاق", "مدرسه"] },
+    { word: "یُؤمِن", correct: "ایمان می‌آورد", options: ["ایمان می‌آورد", "صحبت می‌کند", "صدا می‌زند", "می‌پوشاند"] },
+    { word: "لَقَدْ", correct: "به راستی، قطعاً", options: ["به راستی، قطعاً", "چرا؟", "اکنون", "امروز"] },
+    { word: "أَمْ", correct: "مادر", options: ["مادر", "پدر", "خانواده", "در"] },
+    { word: "بَیت", correct: "خانه", options: ["خانه", "اتاق", "مدرسه", "مغازه"] },
+    { word: "سَتَرَ", correct: "پوشاند", options: ["پوشاند", "بست", "نشست", "برگشت"] },
+    { word: "تَفَضَّل", correct: "بفرما", options: ["بفرما", "بنشین", "بیا", "برو"] },
+    { word: "أُسرة", correct: "خانواده", options: ["خانواده", "مدرسه", "خانه", "اتاق"] },
+    { word: "یَوم", correct: "روز", options: ["روز", "غذا", "خانه", "خیابان"] },
+    { word: "یَسْتِرُ", correct: "می‌پوشاند", options: ["می‌پوشاند", "می‌بندد", "می‌آورد", "می‌دهد"] },
+    { word: "لَمْ", correct: "چرا؟", options: ["چرا؟", "اکنون", "امروز", "به راستی"] },
+    { word: "مَدْرَسَة", correct: "مدرسه", options: ["مدرسه", "خانه", "اتاق", "مغازه"] },
+    { word: "غَداً", correct: "فردا", options: ["فردا", "امروز", "اکنون", "روز"] },
+    { word: "أَحَبُّ", correct: "محبوب‌تر", options: ["محبوب‌تر", "باهوش", "آرام", "بیمار"] },
+    { word: "تَکَلَّمَ", correct: "صحبت کرد", options: ["صحبت کرد", "صدا زد", "نگاه کرد", "نشست"] },
+    { word: "مُسْتَشفی", correct: "بیمارستان", options: ["بیمارستان", "مدرسه", "اداره", "مغازه"] },
+    { word: "الآن", correct: "اکنون", options: ["اکنون", "فردا", "امروز", "دیروز"] },
+    { word: "شاحن الجوّال", correct: "شارژر تلفن همراه", options: ["شارژر تلفن همراه", "علائم راهنمایی", "اداره راهنمایی", "روزنامه دیواری"] },
+    { word: "یَتَکَلَّمُ", correct: "صحبت می‌کند", options: ["صحبت می‌کند", "می‌پوشاند", "نگاه می‌کند", "می‌بندد"] },
+    { word: "الدَّوْران", correct: "گردش", options: ["گردش", "خیابان", "راه", "پیاده‌رو"] },
+    { word: "أمام", correct: "روبه‌رو، جلوی", options: ["روبه‌رو، جلوی", "پشت", "راست", "چپ"] },
+    { word: "إشارات المُروُر", correct: "علائم راهنمایی و رانندگی", options: ["علائم راهنمایی و رانندگی", "اداره راهنمایی", "شارژر تلفن", "روزنامه دیواری"] },
+    { word: "ما", correct: "آنچه، چیزی که", options: ["آنچه، چیزی که", "چرا؟", "اکنون", "امروز"] },
+    { word: "تلمیذ", correct: "دانش‌آموز", options: ["دانش‌آموز", "بیمار", "پلیس", "راننده"] },
+    { word: "خَلْف", correct: "پشت", options: ["پشت", "جلو", "راست", "چپ"] },
+    { word: "إدارة المُروُر", correct: "اداره راهنمایی و رانندگی", options: ["اداره راهنمایی و رانندگی", "علائم راهنمایی", "شارژر تلفن", "روزنامه دیواری"] },
+    { word: "تُوجَدُ", correct: "وجود دارد", options: ["وجود دارد", "نگاه می‌کند", "می‌بندد", "برمی‌گردد"] },
+    { word: "مَرِیض", correct: "بیمار", options: ["بیمار", "دانش‌آموز", "پلیس", "باهوش"] },
+    { word: "یَمین", correct: "راست", options: ["راست", "چپ", "جلو", "پشت"] },
+    { word: "شَقاقَة", correct: "بدبختی، بدشانسی", options: ["بدبختی، بدشانسی", "زشتی", "آرامش", "خانواده"] },
+{ word: "مَحَلّ", correct: "مغازه، محل", options: ["مغازه، محل", "خانه", "مدرسه", "خیابان"] },
+    { word: "سَیّارة", correct: "ماشین", options: ["ماشین", "کشتی", "خانه", "خیابان"] },
+    { word: "یَسار", correct: "چپ", options: ["چپ", "راست", "جلو", "پشت"] },
+    { word: "أنصح", correct: "نصیحت‌کننده‌تر", options: ["نصیحت‌کننده‌تر", "محبوب‌تر", "باهوش‌تر", "آرام‌تر"] },
+    { word: "جِهَة", correct: "سمت، جهت", options: ["سمت، جهت", "خیابان", "راه", "پیاده‌رو"] },
+    { word: "شارِع", correct: "خیابان", options: ["خیابان", "راه", "پیاده‌رو", "مغازه"] },
+    { word: "مَع", correct: "با", options: ["با", "از", "به سوی", "بر، روی"] },
+    { word: "صَحیفة", correct: "روزنامه", options: ["روزنامه", "علائم راهنمایی", "شارژر تلفن", "روزنامه دیواری"] },
+    { word: "مَعَ الأسَف", correct: "با تأسف", options: ["با تأسف", "با شادی", "با خشم", "با آرامش"] },
+    { word: "رَصیف", correct: "پیاده‌رو", options: ["پیاده‌رو", "خیابان", "راه", "مغازه"] },
+    { word: "إلی", correct: "به سوی", options: ["به سوی", "با", "از", "بر، روی"] },
+    { word: "صُحُف", correct: "روزنامه‌ها", options: ["روزنامه‌ها", "علائم", "شارژرها", "خیابان‌ها"] },
+    { word: "ذَکِی", correct: "باهوش", options: ["باهوش", "بیمار", "آرام", "دانش‌آموز"] },
+    { word: "طَریق", correct: "راه، جاده", options: ["راه، جاده", "خیابان", "پیاده‌رو", "مغازه"] },
+    { word: "مِن", correct: "از", options: ["از", "با", "به سوی", "بر، روی"] },
+    { word: "صَحیفة جِداریة", correct: "روزنامه دیواری", options: ["روزنامه دیواری", "روزنامه", "علائم راهنمایی", "اداره راهنمایی"] },
+    { word: "نادی", correct: "صدا زد", options: ["صدا زد", "صحبت کرد", "نگاه کرد", "نشست"] },
+    { word: "شُرطَة", correct: "پلیس", options: ["پلیس", "بیمار", "دانش‌آموز", "راننده"] },
+    { word: "عَلی", correct: "بر، روی", options: ["بر، روی", "از", "با", "به سوی"] },
+    { word: "أیُمکِن أن تَرجِع؟", correct: "آیا ممکن است برگردی؟", options: ["آیا ممکن است برگردی؟", "آیا می‌توانی بنشینی؟", "آیا می‌خواهی بروی؟", "آیا می‌دانی؟"] },
+    { word: "یُندادی", correct: "صدا می‌زند", options: ["صدا می‌زند", "صحبت می‌کند", "نگاه می‌کند", "می‌بندد"] },
+    { word: "قاعِدَة", correct: "قانون، قاعده", options: ["قانون، قاعده", "خیابان", "راه", "پیاده‌رو"] },
+    { word: "الیَوم", correct: "امروز", options: ["امروز", "فردا", "اکنون", "دیروز"] },
+    { word: "صَدَمَ", correct: "برخورد کرد", options: ["برخورد کرد", "نشست", "خوابید", "برگشت"] },
+    { word: "رَقَدَ", correct: "خوابید، بستری شد", options: ["خوابید، بستری شد", "نشست", "برگشت", "بست"] },
+    { word: "ضَروری", correct: "ضروری", options: ["ضروری", "آرام", "باهوش", "بیمار"] },
+    { word: "نَظَرَ", correct: "نگاه کرد", options: ["نگاه کرد", "صحبت کرد", "صدا زد", "نشست"] },
+    { word: "یُصَدِّمُ", correct: "برخورد می‌کند", options: ["برخورد می‌کند", "می‌بندد", "می‌پوشاند", "نگاه می‌کند"] },
+    { word: "هادِئ", correct: "آرام", options: ["آرام", "باهوش", "بیمار", "ضروری"] },
+    { word: "حادِثَة", correct: "حادثه", options: ["حادثه", "غذا", "خانه", "خیابان"] },
+    { word: "عَزَفَ", correct: "شناخت", options: ["شناخت", "نگاه کرد", "صحبت کرد", "صدا زد"] },
+    { word: "بُکاء", correct: "گریه", options: ["گریه", "شادی", "خنده", "آرامش"] },
+    { word: "یَسُدُّون", correct: "می‌بندند", options: ["می‌بندند", "می‌پوشانند", "می‌آورند", "نگاه می‌کنند"] },
+    { word: "جُروح", correct: "جراحت‌ها", options: ["جراحت‌ها", "حادثه", "گریه", "بیماری"] },
+    { word: "رَجَعَ", correct: "برگشت", options: ["برگشت", "نشست", "خوابید", "بست"] },
+    { word: "فَجأَة", correct: "ناگهان", options: ["ناگهان", "آرام", "اکنون", "امروز"] },
+    { word: "سَدَّ", correct: "بست", options: ["بست", "پوشاند", "برگشت", "نشست"] },
+    { word: "غِذاء", correct: "غذا", options: ["غذا", "خانه", "اتاق", "خیابان"] },
+    { word: "سَفینَة", correct: "کشتی", options: ["کشتی", "ماشین", "خانه", "خیابان"] }
+  ];
+var currentIndex = 0, score = 0, order = [];
+  var wordEl = document.getElementById("word");
+  var optionsEl = document.getElementById("options");
+  var messageEl = document.getElementById("message");
+  var scoreEl = document.getElementById("score");
+  var totalEl = document.getElementById("total");
+  var restartBtn = document.getElementById("restart");
+
+  function shuffle(arr) {
+    var a = arr.slice();
+    for (var i = a.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var t = a[i]; a[i] = a[j]; a[j] = t;
+    }
+    return a;
+  }
+
+  function startGame() {
+    score = 0; currentIndex = 0;
+    order = shuffle(questions);
+    scoreEl.textContent = score;
+    totalEl.textContent = order.length;
+    messageEl.textContent = "";
+    restartBtn.style.display = "none";
+    loadQuestion();
+  }
+
+  function loadQuestion() {
+    if (currentIndex >= order.length) {
+      wordEl.textContent = ":tada:";
+      optionsEl.innerHTML = "";
+      messageEl.textContent = "بازی تمام شد! امتیاز: " + score + " از " + order.length;
+      messageEl.style.color = "#ffd700";
+      restartBtn.style.display = "block";
+      return;
+    }
+    var q = order[currentIndex];
+    wordEl.textContent = q.word;
+    messageEl.textContent = "";
+    messageEl.style.color = "#fff";
+    var shuffled = shuffle(q.options);
+    optionsEl.innerHTML = "";
+    for (var i = 0; i < shuffled.length; i++) {
+      var btn = document.createElement("button");
+      btn.className = "option";
+      btn.textContent = shuffled[i];
+      btn.setAttribute("data-value", shuffled[i]);
+      btn.onclick = (function (b, val) {
+        return function () { checkAnswer(b, val, q.correct); };
+      })(btn, shuffled[i]);
+      optionsEl.appendChild(btn);
+    }
+  }
+
+  function checkAnswer(btn, selected, correct) {
+    var all = optionsEl.querySelectorAll(".option");
+    for (var i = 0; i < all.length; i++) all[i].disabled = true;
+    if (selected === correct) {
+      btn.classList.add("correct");
+      score++;
+      scoreEl.textContent = score;
+      messageEl.textContent = ":white_check_mark: درست بود!";
+      messageEl.style.color = "#28a745";
+      launchConfetti();
+      if (navigator.vibrate) navigator.vibrate(50);
+    } else {
+      btn.classList.add("wrong");
+      messageEl.textContent = ":x: اشتباه! جواب: " + correct;
+      messageEl.style.color = "#dc3545";
+      for (var j = 0; j < all.length; j++) {
+        if (all[j].getAttribute("data-value") === correct) all[j].classList.add("correct");
+      }
+      if (navigator.vibrate) navigator.vibrate([50, 50, 50]);
+    }
+    currentIndex++;
+    setTimeout(loadQuestion, 1600);
+  }
+
+  function launchConfetti() {
+    var colors = ["#ffd700","#ff6b6b","#4ecdc4","#45b7d1","#96ceb4","#ffeaa7","#fd79a8"];
+    for (var i = 0; i < 50; i++) {
+      var conf = document.createElement("div");
+      conf.className = "confetti";
+      conf.style.left = Math.random() * 100 + "vw";
+      conf.style.background = colors[Math.floor(Math.random() * colors.length)];
+      conf.style.width = (Math.random() * 8 + 5) + "px";
+      conf.style.height = (Math.random() * 8 + 5) + "px";
+      conf.style.animationDuration = (Math.random() * 2 + 1.5) + "s";
+      conf.style.animationDelay = (Math.random() * 0.3) + "s";
+      conf.style.borderRadius = Math.random() > 0.5 ? "50%" : "2px";
+      document.body.appendChild(conf);
+      (function (c) {
+        setTimeout(function () { if (c.parentNode) c.parentNode.removeChild(c); }, 4000);
+      })(conf);
+    }
+  }
+
+  restartBtn.onclick = startGame;
+  startGame();
+
+  // ثبت Service Worker
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("sw.js").catch(function(){});
+  }
+
+  // بنر نصب
+  var deferredPrompt = null;
+  var installBanner = document.getElementById("installBanner");
+  var installBtn = document.getElementById("installBtn");
+
+  window.addEventListener("beforeinstallprompt", function(e) {
+    e.preventDefault();
+    deferredPrompt = e;
+    installBanner.style.display = "flex";
+  });
+installBtn.addEventListener("click", function() {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      deferredPrompt.userChoice.then(function() {
+        installBanner.style.display = "none";
+        deferredPrompt = null;
+      });
+    }
+  });
+
+  window.addEventListener("appinstalled", function() {
+    installBanner.style.display = "none";
+  });
+</script>
+</body>
+</html>

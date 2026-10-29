@@ -1,4 +1,4 @@
-var CACHE_NAME = "arabic-game-v1";
+var CACHE_NAME = "arabic-game-v2";
 var urlsToCache = [
   "./",
   "./index.html",
